@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context.xsd
+		http://cxf.apache.org/core
+	http://cxf.apache.org/schemas/core.xsd
+		http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+">
+
+	<!--<jaxws:endpoint id="PaymentServiceHTTP" xmlns:pay="http://restaurant-payment.kolinek.org/"
+		serviceName="pay:PaymentService"
+		endpointName="pay:PaymentServiceEndpoint"
+		implementor="org.kolinek.restaurantpayment.impl.PaymentServiceImpl"
+		address="http://localhost:9003/payment">
+		<jaxws:features>
+			<bean class="org.apache.cxf.feature.LoggingFeature" />
+		</jaxws:features>
+	</jaxws:endpoint>-->
+
+	<!-- see http://cxf.apache.org/docs/using-the-jmsconfigfeature.html -->
+	<jaxws:endpoint id="PaymentService" xmlns:pay="http://restaurant-payment.kolinek.org/"
+		address="jms://"
+		serviceName="pay:WidgetService"
+		endpointName="pay:WidgetServiceEndpoint"
+		implementor="org.kolinek.restaurantpayment.impl.PaymentServiceImpl">
+		<jaxws:features>
+			<bean class="org.apache.cxf.transport.jms.JMSConfigFeature">
+				<property name="jmsConfig" ref="amqJmsConfig" />
+			</bean>
+			<bean class="org.apache.cxf.feature.LoggingFeature" />
+		</jaxws:features>
+	</jaxws:endpoint>
+
+
+	<!-- A config for Apache ActiveMQ -->
+	<bean id="amqJmsConfig" class="org.apache.cxf.transport.jms.JMSConfiguration">
+		<property name="connectionFactory" ref="amqJmsConnectionFactory" />
+		<property name="targetDestination" value="PaymentService.Entry" />
+		<property name="pubSubDomain" value="false" />
+	</bean>
+
+	<bean id="amqJmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+		<property name="brokerURL" value="tcp://localhost:61616" />
+	</bean>
+
+</beans>

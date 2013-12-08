@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd
+		http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+">
+
+	<jaxws:client id="client"
+		xmlns:widget="http://restaurant-payment.kolinek.org/"
+		serviceName="widget:WidgetService"
+		endpointName="widget:WidgetServiceEndpoint" address="jms://"
+		serviceClass="org.kolinek.restaurantpayment.PaymentService">
+		<jaxws:features>
+			<bean class="org.apache.cxf.transport.jms.JMSConfigFeature">
+	    		<property name="jmsConfig" ref="amqJmsConfig"/>
+			</bean>
+		</jaxws:features>
+	</jaxws:client>
+
+	<!-- A config for Apache ActiveMQ -->
+	<bean id="amqJmsConfig" class="org.apache.cxf.transport.jms.JMSConfiguration">
+    	<property name="connectionFactory" ref="amqJmsConnectionFactory" />
+		<property name="targetDestination" value="PaymentService.Entry" />
+		<property name="pubSubDomain" value="false" />
+	</bean>
+		
+	<bean id="amqJmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+		<property name="brokerURL" value="tcp://localhost:61616" />
+	</bean>
+
+</beans>
